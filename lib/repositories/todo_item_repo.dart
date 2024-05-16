@@ -30,8 +30,8 @@ class TodoItemRepository {
         .collection('apps/group-todo-list/users')
         .doc(userId)
         .collection('todo-items')
-        .add(itemMap)
-        .timeout(timeout); // Add timeout to handle network issues
+        .add(itemMap); // write to local cache immediately
+    // .timeout(timeout); // Add timeout to handle network issues
 
     return docRef.id;
   }
@@ -52,7 +52,7 @@ class TodoItemRepository {
       final bool currentStatus = itemSnapshot.data()?['isDone'] ??
           false; // Assuming 'isDone' is stored as a boolean
       transaction.update(itemRef, {'isDone': !currentStatus});
-    });
+    }).timeout(timeout); // Add timeout to handle network issues
   }
 
   Future<void> reassignItem(
@@ -92,7 +92,7 @@ class TodoItemRepository {
         .doc(userId)
         .collection('todo-items')
         .doc(itemId)
-        .delete()
-        .timeout(timeout); // Add timeout to handle network issues
+        .delete(); // write to local cache immediately
+    //.timeout(timeout); // Add timeout to handle network issues
   }
 }

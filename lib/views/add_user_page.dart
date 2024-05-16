@@ -146,23 +146,26 @@ class _AddUserPageState extends State<AddUserPage> {
     // Check if the widget is still mounted after async gap
     if (!mounted) return;
 
-    try {
-      await Provider.of<AllUsersViewModel>(context, listen: false)
-          .addUser(newUser);
+    // Timeout/offline check is NOT needed because Firestore always writes to local cache first
+    // try {
+    //   await Provider.of<AllUsersViewModel>(context, listen: false)
+    //       .addUser(newUser);
 
-      if (mounted) {
-        Provider.of<NavigationService>(context, listen: false).goUsers();
-      }
-    } on TimeoutException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Operation timed out: ${e.message}"),
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
+    //   if (mounted) {
+    //     Provider.of<NavigationService>(context, listen: false).goUsers();
+    //   }
+    // } on TimeoutException catch (e) {
+    //   if (mounted) {
+    //     ScaffoldMessenger.of(context).clearSnackBars();
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text("Operation timed out: ${e.message}"),
+    //         duration: const Duration(seconds: 3),
+    //       ),
+    //     );
+    //   }
+    // }
+    Provider.of<AllUsersViewModel>(context, listen: false).addUser(newUser);
+    Provider.of<NavigationService>(context, listen: false).goUsers();
   }
 }

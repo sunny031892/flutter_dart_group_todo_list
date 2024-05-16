@@ -134,24 +134,28 @@ class _AddTodoPageState extends State<AddTodoPage> {
       userId: viewModel.userId,
     );
 
-    try {
-      await viewModel.addItem(newItem);
+    // Timeout/offline check is NOT needed because Firestore always writes to local cache first
+    // try {
+    //   await viewModel.addItem(newItem);
 
-      // Check if the widget is still mounted after async gap
-      if (mounted) {
-        Provider.of<NavigationService>(context, listen: false)
-            .goTodosOnUsers(viewModel.userId);
-      }
-    } on TimeoutException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Operation timed out: ${e.message}"),
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
+    //   // Check if the widget is still mounted after async gap
+    //   if (mounted) {
+    //     Provider.of<NavigationService>(context, listen: false)
+    //         .goTodosOnUsers(viewModel.userId);
+    //   }
+    // } on TimeoutException catch (e) {
+    //   if (mounted) {
+    //     ScaffoldMessenger.of(context).clearSnackBars();
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text("Operation timed out: ${e.message}"),
+    //         duration: const Duration(seconds: 3),
+    //       ),
+    //     );
+    //   }
+    // }
+    viewModel.addItem(newItem);
+    Provider.of<NavigationService>(context, listen: false)
+        .goTodosOnUsers(viewModel.userId);
   }
 }

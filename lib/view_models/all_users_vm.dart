@@ -27,4 +27,11 @@ class AllUsersViewModel with ChangeNotifier {
   Future<void> addUser(User newUser) async {
     await _userRepository.addUser(newUser);
   }
+
+  // 添加用戶刪除的方法
+  Future<void> deleteUser(String userId) async {
+    await _userRepository.deleteUser(userId); // 調用 UserRepository 中的刪除方法
+    _users.removeWhere((user) => user.id == userId); // 從本地列表中移除用戶
+    notifyListeners(); // 通知所有觀察者
+  }
 }

@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_app/models/user.dart';
 import 'package:flutter_app/services/navigation.dart';
@@ -8,7 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 class UserGridPage extends StatelessWidget {
-  const UserGridPage({super.key});
+  const UserGridPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -25,12 +24,11 @@ class UserGridPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Consumer<AllUsersViewModel>(
+      body: Consumer<AllUsersViewModel>(  // 使用 Consumer 来确保正确访问 Provider
         builder: (context, viewModel, _) {
           if (viewModel.users.isEmpty) {
             return const Center(child: Text('No users.'));
           }
-          // Calculate the number of grid columns, ensuring there's at least one column
           double screenWidth = MediaQuery.of(context).size.width;
           double gridTileMinWidth = 150;
           int gridCrossAxisCount =
@@ -40,8 +38,8 @@ class UserGridPage extends StatelessWidget {
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: gridCrossAxisCount,
               childAspectRatio: 3 / 4,
-              crossAxisSpacing: 8.0, // 8dp spacing between grid tiles
-              mainAxisSpacing: 8.0, // 8dp spacing between grid tiles
+              crossAxisSpacing: 8.0,
+              mainAxisSpacing: 8.0,
             ),
             padding:
                 EdgeInsets.fromLTRB(16, 16, 16, 16 + safeAreaBottomPadding),
@@ -62,39 +60,72 @@ class UserGridPage extends StatelessWidget {
       child: Card(
         color: Theme.of(context).colorScheme.secondaryContainer,
         elevation: 0,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 120,
-                height: 120,
-                child: _buildAvatarImage(context, user),
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: IconButton(
+                icon: Icon(Icons.close, color: Colors.red),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Confirm Delete'),
+                        content: Text('Are you sure you want to delete ${user.name}? This will redistribute all items.'),
+                        actions: [
+                          TextButton(
+                            child: Text('Cancel'),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                          TextButton(
+                            child: Text('Delete'),
+                            onPressed: () {
+                              Provider.of<AllUsersViewModel>(context, listen: false).deleteUser(user.id!);
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
-              const SizedBox(height: 4),
-              Text(
-                user.name,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                style: theme.textTheme.titleMedium,
-                textAlign: TextAlign.center,
-              ),
-              RichText(
-                text: TextSpan(
-                  // Default text style for all spans
-                  style: theme.textTheme.headlineLarge,
-                  text: '${user.itemCount} ',
-                  children: <TextSpan>[
-                    TextSpan(
-                      text: 'items to do.',
-                      style: theme.textTheme.bodyMedium,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 120,
+                    height: 120,
+                    child: _buildAvatarImage(context, user),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    user.name,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: theme.textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  RichText(
+                    text: TextSpan(
+                      style: theme.textTheme.headlineLarge,
+                      text: '${user.itemCount} ',
+                      children: <TextSpan>[
+                        TextSpan(
+                          text: 'items to do.',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

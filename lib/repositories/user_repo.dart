@@ -25,6 +25,15 @@ class UserRepository {
     await _db
         .collection('apps/group-todo-list/users')
         .add(userMap)
+        .timeout(timeout); // write to local cache immediately and add timeout to handle network issues
+  }
+
+  // 添加 deleteUser 方法
+  Future<void> deleteUser(String userId) async {
+    await _db
+        .collection('apps/group-todo-list/users')
+        .doc(userId)
+        .delete()
         .timeout(timeout); // Add timeout to handle network issues
   }
 }

@@ -132,13 +132,13 @@ class _TodoListPageState extends State<TodoListPage> {
   void _toggleTodoDone(TodosOfUserViewModel viewModel, String itemId) async {
     try {
       await viewModel.toggleDone(itemId);
-    } on TimeoutException catch (e) {
+    } catch (e) {
       // Check if the widget is still mounted after async gap
       if (mounted) {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Operation timed out: ${e.message}"),
+            content: Text("Operation failed: $e"),
             duration: const Duration(seconds: 3),
           ),
         );
@@ -190,20 +190,23 @@ class _TodoListPageState extends State<TodoListPage> {
     );
 
     // Since the `deleteItem()` is non-transactional, it is first synchronously executed on local cache before the server operation. This can lead error when animating the deletion. To avoid this, we call `deleteItem()` after the  animation starts.
-    try {
-      await viewModel.deleteItem(item.id!);
-    } on TimeoutException catch (e) {
-      // Check if the widget is still mounted after async gap
-      if (mounted) {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Operation timed out: ${e.message}"),
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
+
+    // Timeout/offline check is NOT needed because Firestore always writes to local cache first
+    // try {
+    //   await viewModel.deleteItem(item.id!);
+    // } on TimeoutException catch (e) {
+    //   // Check if the widget is still mounted after async gap
+    //   if (mounted) {
+    //     ScaffoldMessenger.of(context).clearSnackBars();
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text("Operation timed out: ${e.message}"),
+    //         duration: const Duration(seconds: 3),
+    //       ),
+    //     );
+    //   }
+    // }
+    viewModel.deleteItem(item.id!);
   }
 
   Future<void> _animateReassignItem(
@@ -222,12 +225,12 @@ class _TodoListPageState extends State<TodoListPage> {
             animatedItem: item),
         duration: const Duration(milliseconds: 300),
       );
-    } on TimeoutException catch (e) {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Operation timed out: ${e.message}"),
+            content: Text("Operation failed: $e"),
             duration: const Duration(seconds: 3),
           ),
         );
